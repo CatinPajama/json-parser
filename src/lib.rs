@@ -1,5 +1,4 @@
-mod parser_combinator;
-
+pub mod parser_combinator;
 pub mod json_parser {
 
     use crate::parser_combinator::*;
@@ -33,7 +32,12 @@ pub mod json_parser {
     
     pub fn parse_key<'a>() -> impl Parser<'a,String> {
         //map(left(left(zero_or_more(predicate(any_char,|c| *c != ' ')),space0()),predicate(any_char,|c| *c == ':')),|c| c.into_iter().collect())
-        map(left(whitespace_wrap(zero_or_more(predicate(any_char,|c| *c != ' '))),predicate(any_char,|c| *c == ':')), |c| c.into_iter().collect())
+        map(left(whitespace_wrap(right(
+            match_literal("\""),
+            left(
+                zero_or_more(predicate(any_char,|c| *c != '\"')),
+            match_literal("\""),
+        ))),predicate(any_char,|c| *c == ':')),|c| (c.into_iter().collect()))
     }
 
     pub fn parse_json_number<'a>() -> impl Parser<'a,JsonValue> {
@@ -57,6 +61,7 @@ pub mod json_parser {
         let a = whitespace_wrap(left(right(match_literal("{"),zero_or_more(parse_key_value())),match_literal("}")));
         map(a,|v| JsonValue::JsonObject(v.into_iter().map(|(key,val)|  JsonNode{key , value : val}).collect()))
     }
+
     
     pub fn whitespace_wrap<'a,P,O>(p : P) -> impl Parser<'a,O> 
     where 
@@ -70,7 +75,7 @@ pub mod json_parser {
         //right(space0(),pair(parse_key(),left(parse_value(),left(match_literal(","),space0()))))
         //pair(parse_key(),parse_value())
         //left(right(space0(),pair(parse_key(),left(parse_value(),zero_or_more(match_literal(","))))),space0())
-        right(space0(),pair(parse_key(),parse_value()))
+        whitespace_wrap(pair(parse_key(),parse_value()))
     }
 }
 
