@@ -92,13 +92,13 @@ mod tests {
     #[test]
     fn test_key() {
         let p = parse_key();
-        assert_eq!(p.parse("gaurab : "),Ok((" ","gaurab".to_string())));
+        assert_eq!(p.parse("\"gaurab\" : "),Ok((" ","gaurab".to_string())));
     }
 
     #[test]
     fn test_object_value() {
         let p = parse_json_object();
-        let x = p.parse("{gaurab : 92}");
+        let x = p.parse("{\"gaurab\" : 92}");
         assert_eq!(x,Ok(("",JsonValue::JsonObject(vec![JsonNode{key:"gaurab".to_string(),value : JsonValue::JsonNumber(92)}]))));
     }
 
@@ -106,11 +106,11 @@ mod tests {
     #[test]
     fn test_key_value() {
         let p = parse_key_value();
-        let x = p.parse("man : {gaurab : 92}");
+        let x = p.parse("\"man\" : {\"gaurab\" : 92}");
         assert_eq!(x,Ok(("",("man".to_string(),JsonValue::JsonObject(vec![JsonNode{key:"gaurab".to_string(),value : JsonValue::JsonNumber(92)}])))));
 
         let p2 =parse_json_object();
-        let x2 = p2.parse("{gaurab : 92, kapil : {name : \"kapil\", mark : [1,2]}}");
+        let x2 = p2.parse("{\"gaurab\" : 92, \"kapil\" : {\"name\" : \"kapil\", \"mark\" : [1,2]}}");
         let l1 = JsonNode {key : "gaurab".to_string(), value : JsonValue::JsonNumber(92)};
 
         let l21 = JsonNode{key : "name".to_string(), value : JsonValue::JsonString("kapil".to_string())};
